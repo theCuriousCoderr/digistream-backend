@@ -151,7 +151,7 @@ app.post("/get-registrations", verifyToken, async (req, res) => {
         matric: req.matric,
       });
     }
-    // console.log(registrations);
+    console.log(registrations.length);
     res.status(200).send({ data: registrations });
   } catch (err) {
     console.log(err);
