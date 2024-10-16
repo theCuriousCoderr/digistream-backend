@@ -58,9 +58,6 @@ if (env === "development") {
 }
 
 async function connectMongoDB() {
-  console.log("On");
-  let KEY = true;
-  while (KEY) {
     try {
       let res = await mongoose.connect(process.env.MONGODB_URL);
       if (res.connections) {
@@ -70,7 +67,6 @@ async function connectMongoDB() {
     } catch (error) {
       console.log(`OLA MongoDB Initial Connection Error: ${error}`);
     }
-  }
 }
 connectMongoDB();
 
