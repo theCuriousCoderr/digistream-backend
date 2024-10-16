@@ -60,9 +60,6 @@ if (env === "development") {
 async function connectMongoDB() {
     try {
       let res = await mongoose.connect(process.env.MONGODB_URL);
-      if (res.connections) {
-        KEY = false;
-      }
       console.log(`MongoDB Success: Database connected successfully`);
     } catch (error) {
       console.log(`OLA MongoDB Initial Connection Error: ${error}`);
@@ -72,12 +69,6 @@ connectMongoDB();
 
 // GET METHODS
 app.get("/", async (req, res) => {
-  // let count = await Admins.deleteMany({});
-  // let admin = await Admins.create({
-  //   id: "Agric Engineering",
-  //   role: "department",
-  //   password: "AEE-digistream",
-  // })
   res
     .status(200)
     .send(
