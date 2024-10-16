@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 const server = http.createServer(app);
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "/tmp/uploads/" });
 
 cloudinarySDK.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
