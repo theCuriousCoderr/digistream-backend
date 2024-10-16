@@ -53,10 +53,8 @@ let env = process.env.NODE_ENV;
 let baseUrl, feURL, cookieSecure;
 if (env === "development") {
   feURL = "http://localhost:3000";
-  cookieSecure = false;
 } else {
   feURL = "https://intertwined-fe.vercel.app";
-  cookieSecure = true;
 }
 
 async function connectMongoDB() {
