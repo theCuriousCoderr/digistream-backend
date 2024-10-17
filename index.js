@@ -68,8 +68,8 @@ async function connectMongoDB() {
         KEY = false;
       }
     } catch (error) {
-      console.log(`OLA MongoDB Initial Connection Error: ${error}`);
-      console.log(`Restarting ...`);
+      
+      console.log(`Restarting MongoDB Connection ...`);
     }
   }
 }
@@ -204,22 +204,26 @@ app.post("/get-dept-registrations", verifyToken, async (req, res) => {
 
 // handle departmental registrations approvals
 app.post("/dept-registrations-approval", async (req, res) => {
-  let { matric, dept, comment, handle } = req.body;
+  console
+  let { id, matric, dept, comment, handle } = req.body;
   if (comment === "") {
     comment = "No Comment"
   }
   try {
-    let studentReg = await DeptRegistration.findOne({matric: matric, department: dept});
+    let studentReg = await DeptRegistration.findById({_id: id});
+    if (!studentReg) {
+      res.status(201).send({ data: "Document doesn't exist" });
+      return
+    }
     if (studentReg && studentReg.status !== "pending") {
       res.status(201).send({ data: "Action has been taken already" });
+      return
     }
     if (studentReg && studentReg.status === "pending") {
       studentReg.comment = comment;
       studentReg.status = handle;
       await studentReg.save()
       res.status(200).send({ data: "Status Updated Successfully" });
-    } else {
-      res.status(201).send({ data: "Student doesn't exist" });
     }
 
   } catch (err) {
@@ -257,7 +261,6 @@ app.post("/signup", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  console.log(req.body)
   try {
     const { matric, password, role } = req.body;
 
