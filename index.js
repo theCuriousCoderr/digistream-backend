@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 const server = http.createServer(app);
-const upload = multer({ dest: "/tmp/uploads/" });
+const upload = multer({ dest: "/tmp/uploads" });
 
 cloudinarySDK.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -58,17 +58,27 @@ if (env === "development") {
 }
 
 async function connectMongoDB() {
+  let KEY = true
+  while (KEY) {
     try {
-      let res = await mongoose.connect(process.env.MONGODB_URL);
-      console.log(`MongoDB Success: Database connected successfully`);
+      let connect = await mongoose.connect(process.env.MONGODB_URL);
+      if (connect.connections) {
+        console.log(`MongoDB Success: Database connected successfully`);
+        console.log(`Loop Ended`);
+        KEY = false;
+      }
     } catch (error) {
       console.log(`OLA MongoDB Initial Connection Error: ${error}`);
+      console.log(`Restarting ...`);
     }
+  }
 }
 connectMongoDB();
 
+
 // GET METHODS
 app.get("/", async (req, res) => {
+  // let count = await DeptRegistration.deleteMany({})
   res
     .status(200)
     .send(
@@ -89,7 +99,13 @@ app.post(
       labFeesReceiptFile: "",
       courseFormFile: "",
     };
-    console.log(req.body);
+
+    // console.log(req.body);
+    // console.log(req.files);
+    // res.status(200).send({ data: "File Submitted Successfully" });
+
+    // return
+
 
     try {
       // iterate over the object (dictionary)
@@ -136,8 +152,10 @@ app.post(
 
 // For students
 app.post("/get-registrations", verifyToken, async (req, res) => {
-  // console.log(req.matric);
+  console.log(req.matric);
   const { regType } = req.body;
+  console.log(regType);
+
   try {
     let registrations;
     if (regType === "Departmental") {
@@ -161,7 +179,7 @@ app.post("/get-registrations", verifyToken, async (req, res) => {
 
 // For Departments
 app.post("/get-dept-registrations", verifyToken, async (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   const { regType, role } = req.body;
   try {
     let registrations;
