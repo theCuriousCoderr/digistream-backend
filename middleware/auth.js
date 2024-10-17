@@ -5,6 +5,7 @@ dotenv.config();
 function verifyToken(req, res, next) {
   if (req.headers["authorization"].length < 1) {
     res.status(201).send({ data: "Log In First" });
+    return
   }
   const tokens = req.headers["authorization"].split(";");
 
@@ -13,6 +14,7 @@ function verifyToken(req, res, next) {
 
   if (!token && !refreshToken) {
     res.status(201).send({ data: "Log In First" });
+    return
   }
 
   try {

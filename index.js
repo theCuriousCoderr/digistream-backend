@@ -82,9 +82,34 @@ app.get("/", async (req, res) => {
   res
     .status(200)
     .send(
-      `Welcome to DigiStream 😊, Cloud Name: ${process.env.CLOUDINARY_CLOUD_NAME}`
+      `Welcome 😁😁`
     );
 });
+// GET METHODS
+app.get("/i-make-apis-too", async (req, res) => {
+  res
+    .status(200)
+    .send(
+      `I make APIs too 😅😅`
+    );
+});
+app.get("*", async (req, res) => {
+  // let count = await DeptRegistration.deleteMany({})
+  res
+    .status(200)
+    .send(
+      ` 😥😣 Route doesn't exist`
+    );
+});
+app.post("*", verifyToken, async (req, res) => {
+  // let count = await DeptRegistration.deleteMany({})
+  res
+    .status(200)
+    .send(
+      `😥 Route doesn't exist`
+    );
+});
+
 
 // process registration forms
 app.post(
