@@ -58,7 +58,7 @@ if (env === "development") {
 }
 
 async function connectMongoDB() {
-  let KEY = true
+  let KEY = true;
   while (KEY) {
     try {
       let connect = await mongoose.connect(process.env.MONGODB_URL);
@@ -68,48 +68,21 @@ async function connectMongoDB() {
         KEY = false;
       }
     } catch (error) {
-      
       console.log(`Restarting MongoDB Connection ...`);
     }
   }
 }
 connectMongoDB();
 
-
 // GET METHODS
 app.get("/", async (req, res) => {
   // let count = await DeptRegistration.deleteMany({})
-  res
-    .status(200)
-    .send(
-      `Welcome 😁😁`
-    );
+  res.status(200).send(`Welcome 😁😁`);
 });
 // GET METHODS
 app.get("/i-make-apis-too", async (req, res) => {
-  res
-    .status(200)
-    .send(
-      `I make APIs too 😅😅`
-    );
+  res.status(200).send(`I make APIs too 😅😅`);
 });
-app.get("*", async (req, res) => {
-  // let count = await DeptRegistration.deleteMany({})
-  res
-    .status(200)
-    .send(
-      ` 😥😣 Route doesn't exist`
-    );
-});
-app.post("*", verifyToken, async (req, res) => {
-  // let count = await DeptRegistration.deleteMany({})
-  res
-    .status(200)
-    .send(
-      `😥 Route doesn't exist`
-    );
-});
-
 
 // process registration forms
 app.post(
@@ -130,7 +103,6 @@ app.post(
     // res.status(200).send({ data: "File Submitted Successfully" });
 
     // return
-
 
     try {
       // iterate over the object (dictionary)
@@ -211,12 +183,12 @@ app.post("/get-dept-registrations", verifyToken, async (req, res) => {
     if (role === "department") {
       registrations = await DeptRegistration.find({
         department: regType,
-        facultyDuesReceipt: ""
+        facultyDuesReceipt: "",
       });
     } else {
       registrations = await DeptRegistration.find({
         faculty: regType,
-        deptDuesReceipt: ""
+        deptDuesReceipt: "",
       });
     }
     // console.log(registrations);
@@ -229,35 +201,33 @@ app.post("/get-dept-registrations", verifyToken, async (req, res) => {
 
 // handle departmental registrations approvals
 app.post("/dept-registrations-approval", async (req, res) => {
-  console
+  console;
   let { id, matric, dept, comment, handle } = req.body;
   if (comment === "") {
-    comment = "No Comment"
+    comment = "No Comment";
   }
   try {
-    let studentReg = await DeptRegistration.findById({_id: id});
+    let studentReg = await DeptRegistration.findById({ _id: id });
     if (!studentReg) {
       res.status(201).send({ data: "Document doesn't exist" });
-      return
+      return;
     }
     if (studentReg && studentReg.status !== "pending") {
       res.status(201).send({ data: "Action has been taken already" });
-      return
+      return;
     }
     if (studentReg && studentReg.status === "pending") {
       studentReg.comment = comment;
       studentReg.status = handle;
-      await studentReg.save()
+      await studentReg.save();
       res.status(200).send({ data: "Status Updated Successfully" });
     }
-
   } catch (err) {
     console.log(err);
     res.status(500).send({ data: "Couldnt Complete Action" });
-
   }
-  console.log(req.body)
-})
+  console.log(req.body);
+});
 
 app.post("/signup", async (req, res) => {
   try {
@@ -286,6 +256,7 @@ app.post("/signup", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
+  console.log("Ikl");
   try {
     const { matric, password, role } = req.body;
 
@@ -295,10 +266,6 @@ app.post("/login", async (req, res) => {
       if (!admin) {
         return res.status(201).send({ data: "Incorrect Id" });
       }
-      console.log("---------")
-      console.log(admin.role)
-      console.log(role)
-      console.log("---------")
       if (admin.role !== role) {
         return res.status(201).send({ data: "Incorrect Role" });
       }
@@ -307,7 +274,6 @@ app.post("/login", async (req, res) => {
       }
     }
 
-    
     if (role === "student") {
       const student = await Students.findOne({ matric });
       if (!student) {
@@ -317,13 +283,9 @@ app.post("/login", async (req, res) => {
       if (!passwordMatch) {
         return res.status(201).send({ data: "Incorrect Password" });
       }
-      // fullName = `${student.lastName} ${student.firstName} ${student.middleName}`
     }
 
-    const token = jwt.sign(
-      { userId: matric }, 
-      process.env.JWT_SECRET_KEY, 
-      {
+    const token = jwt.sign({ userId: matric }, process.env.JWT_SECRET_KEY, {
       expiresIn: "24h",
     });
 
@@ -347,9 +309,43 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/student-dashboard", verifyToken, async (req, res) => {
-  // console.log(req.newToken);
-  // console.log(req.newLogin);
-  res.status(200).send({ data: "Working" });
+  try {
+    // if the main access Token expires and the refresh token is still valid,
+    // generate a new main access token
+    if (req.newToken !== "False" && req.newLogin === "False" ) {
+      const token = req.newToken;
+      const refreshToken = req.refreshToken;
+      return res.status(200).send({
+        data: "Access Token Renewed",
+        token: token,
+        refreshToken: refreshToken,
+        matric: token.userId,
+      });
+    }
+
+    // if both the main access token and the refresh token has expired,
+    // redirect user to login again
+    if (req.newToken === "False" && req.newLogin === "True" ) {
+      return res.status(201).send({ data: "Log In Again" });
+    }
+
+    // if the main access token is still valid
+    if (req.newToken === "False" && req.newLogin === "False" ) {
+      return res.status(200).send({ data: "Access Verified." });
+    }
+  } catch (err) {
+    // if there is a connection issue
+    return res.status(500).send({ data: "Connection Error.\nTry again." });
+  }
+});
+
+app.get("*", async (req, res) => {
+  // let count = await DeptRegistration.deleteMany({})
+  res.status(200).send(` 😥😣 Route doesn't exist`);
+});
+app.post("*", verifyToken, async (req, res) => {
+  // let count = await DeptRegistration.deleteMany({})
+  res.status(200).send(`😥 Route doesn't exist`);
 });
 
 server.listen(PORT, (req, res) => {
